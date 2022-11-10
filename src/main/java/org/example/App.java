@@ -2,11 +2,10 @@ package org.example;
 
 import org.example.model.Item;
 import org.example.model.Person;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.*;
-
-
 
 
 public class App {
@@ -20,14 +19,28 @@ public class App {
         try {
             session.beginTransaction();
 
-            Person person = new Person("Test cascading",35);
-            person.addItem(new Item("item1"));
-            person.addItem(new Item("item2"));
-            person.addItem(new Item("item3"));
+            Person person = session.get(Person.class, 8);
+            System.out.println("Got the person from session1");
 
-            session.save(person);
 
             session.getTransaction().commit();
+            // session.close() - auto
+            System.out.println("Session is closed");
+
+            // открываем сессию и транзакцию еще раз(можно делать в любом месте)
+            session = sessionFactory.getCurrentSession();
+            session.beginTransaction();
+
+            System.out.println("Inside the second transaction");
+
+            person = (Person) session.merge(person);
+
+            Hibernate.initialize(person.getItems());
+
+            session.getTransaction().commit();
+            System.out.println("Out of session2");
+
+            System.out.println(person.getItems());
 
         } finally {
             sessionFactory.close();
