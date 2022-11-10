@@ -21,26 +21,20 @@ public class App {
 
             Person person = session.get(Person.class, 8);
             System.out.println("Got the person from session1");
-
-
             session.getTransaction().commit();
             // session.close() - auto
             System.out.println("Session is closed");
 
-            // открываем сессию и транзакцию еще раз(можно делать в любом месте)
+            // открываем сессию2 и транзакцию еще раз(можно делать в любом месте)
             session = sessionFactory.getCurrentSession();
             session.beginTransaction();
-
             System.out.println("Inside the second transaction");
-
             person = (Person) session.merge(person);
-
-            Hibernate.initialize(person.getItems());
-
+            Hibernate.initialize(person.getItems()); // явно указываем что мы хоти подгрузить опдвязаные сущности
             session.getTransaction().commit();
             System.out.println("Out of session2");
 
-            System.out.println(person.getItems());
+            System.out.println(person.getItems()); // после initialize можно вызывать вне транзакции
 
         } finally {
             sessionFactory.close();
